@@ -18,16 +18,13 @@ io.on("connection", (socket) => {
 
     socket.on('createRoom', () => {
         const random = randomize('A0', 5);
-        const connectedSockets = io.sockets.adapter.rooms.get(random);
-        console.log(connectedSockets);
-        console.log('first');
         socket.join(random);
         socket.emit('firstPlayerJoin', random);
     })
 
     socket.on("joinRoom", (roomCode) => {
         const connectedSockets = io.sockets.adapter.rooms.get(roomCode);
-        console.log(connectedSockets);
+
         if (!connectedSockets || connectedSockets.size === 0) {
             return socket.emit('error', "Enter Valid Code");
         }
@@ -42,6 +39,14 @@ io.on("connection", (socket) => {
     socket.on("play", ({ id, roomCode, ch }) => {
         console.log(`play ${ch} at ${id} to ${roomCode}`);
         socket.broadcast.to(roomCode).emit("updateGame", id, ch);
+    });
+
+    socket.on('newGame', (roomCode) => {
+        socket.broadcast.to(roomCode).emit('newGame');
+    });
+
+    socket.on('secondPlayerNewGame', (roomCode) => {
+        socket.broadcast.to(roomCode).emit('secondPlayerNewGame');
     });
 
     socket.on("disconnect", () => {
